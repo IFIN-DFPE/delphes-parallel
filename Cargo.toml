@@ -1,0 +1,13 @@
+[package]
+name = "delphes-parallel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hepmc2 = "0.7.0"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
