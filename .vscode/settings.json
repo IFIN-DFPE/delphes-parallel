@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "cmake.configureArgs": [
+        "-DHEPMC2_DIR=/data/bsm/software/installed/hepmc/2.6.10"
+    ]
+}
