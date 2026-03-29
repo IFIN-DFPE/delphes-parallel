@@ -1,1 +1,6 @@
 /target
+
+*.exe
+*.hepmc
+*.root
+*.log

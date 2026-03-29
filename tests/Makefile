@@ -4,17 +4,20 @@ LINKER_FLAGS ?= -lpythia8 -lHepMC
 
 DELPHES_CONFIG_FILE ?= /data/bsm/software/installed/delphes/3.5.1/cards/delphes_card_ATLAS.tcl
 
-.PHONY: run clean clean-binaries clean-data clean-logs
+.PHONY: run clean clean-binaries clean-data clean-output clean-logs
 
 run: output.root
 
-clean: clean-binaries clean-data clean-logs
+clean: clean-binaries clean-data clean-output clean-logs
 
 clean-binaries:
 	-rm *.exe
 
 clean-data:
 	-rm *.hepmc
+
+clean-output:
+	-rm *.root
 
 clean-logs:
 	-rm *.log
