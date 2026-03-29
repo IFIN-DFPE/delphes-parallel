@@ -36,6 +36,8 @@ I've done a few (superficial) benchmarks, but enough to gather reasonable eviden
 
   Note that some of the other parts of the pipeline (such as running Pythia) were already run in parallel by MadGraph.
 
+In both cases, parallel Delphes was configured to use **64 cores** (while the original Delphes was able to run on a single one).
+
 ## Installation instructions
 
 This wrapper has been written in [Rust](https://rust-lang.org/). The easiest way to install and manage Rust is by using [rustup](https://rustup.rs/).
