@@ -1,5 +1,6 @@
 use std::{
-    fs::File,
+    env::current_exe,
+    fs::{File, canonicalize},
     io::{BufRead, BufWriter},
     path::{Path, PathBuf},
     process::{Child, Command},
@@ -110,10 +111,29 @@ pub fn split_input_into_shards<R: BufRead>(
 ///
 /// Returns the list of output ROOT file paths.
 pub fn process_shards(
+    delphes_hepmc2_executable_path: &Path,
     shard_paths: &Vec<PathBuf>,
     delphes_config_file_path: &Path,
     output_directory: &Path,
 ) -> Vec<PathBuf> {
+    if delphes_hepmc2_executable_path == "DelphesHepMC2" {
+        panic!(
+            "DelphesHepMC2 executable must be provided as an absolute/relative path, not the name of an executable found in the search PATH"
+        )
+    }
+
+    let delphes_hepmc2_executable_path = canonicalize(delphes_hepmc2_executable_path)
+        .expect("Failed to determine absolute path to Delphes2HepMC executable");
+
+    let current_exe_path =
+        current_exe().expect("Failed to determine absolute path to currently running executable");
+
+    if current_exe_path == delphes_hepmc2_executable_path {
+        panic!(
+            "DelphesHepMC2 original executable path matches current executable's path; risk of fork bomb"
+        )
+    }
+
     let num_shards = shard_paths.len();
     println!("Spawning {} parallel Delphes subprocesses...", num_shards);
 
@@ -131,7 +151,7 @@ pub fn process_shards(
         .collect();
         let input_file_path = &shard_paths[index];
 
-        let child = Command::new("DelphesHepMC2")
+        let child = Command::new(delphes_hepmc2_executable_path.to_str().unwrap())
             .args([
                 delphes_config_file_path.to_str().unwrap(),
                 output_file_path.to_str().unwrap(),

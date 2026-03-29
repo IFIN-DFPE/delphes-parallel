@@ -50,9 +50,9 @@ struct Cli {
     #[arg(long, default_value_t = true)]
     cleanup: bool,
 
-    /// Path to original DelphesHepMC2 binary.
+    /// Path to original DelphesHepMC2 executable.
     #[arg(long)]
-    delphes_hepmc2_binary: Option<PathBuf>,
+    delphes_hepmc2_executable: Option<PathBuf>,
 
     /// How many shards to break the input file(s) into.
     ///
@@ -83,15 +83,14 @@ fn main() {
         panic!("Output file already exists");
     }
 
-    let delphes_hepmc2_binary_path = cli
-        .delphes_hepmc2_binary
+    let delphes_hepmc2_executable_path = cli
+        .delphes_hepmc2_executable
         .or_else(|| env::var("DELPHES_HEPMC2_PATH").map(PathBuf::from).ok())
-        .or_else(|| env::var("DELPHES_HEPMC2_BINARY").map(PathBuf::from).ok())
-        .expect("Failed to determine `DelphesHepMC2` binary path");
+        .expect("Failed to determine `DelphesHepMC2` executable path");
 
     println!(
-        "Wrapping original `DelphesHepMC2` binary '{}'",
-        delphes_hepmc2_binary_path.to_str().unwrap()
+        "Wrapping original `DelphesHepMC2` executable '{}'",
+        delphes_hepmc2_executable_path.to_str().unwrap()
     );
 
     let num_shards = cli.num_shards.or_else( ||
@@ -240,8 +239,12 @@ fn main() {
 
     create_dir_all(&outputs_directory).expect("Failed to create shard outputs subdirectory");
 
-    let root_output_files_paths =
-        process_shards(&shard_paths, &config_file_path, &outputs_directory);
+    let root_output_files_paths = process_shards(
+        &delphes_hepmc2_executable_path,
+        &shard_paths,
+        &config_file_path,
+        &outputs_directory,
+    );
 
     merge_shards(&root_output_files_paths, &output_file_path);
 
