@@ -124,14 +124,16 @@ fn main() {
         "Failed to create temporary directory for storing parallelization intermediary data files",
     );
 
+    let tmp_dir_path = tmp_dir.path();
+
     {
         let cleanup = cli.cleanup;
-        let tmp_dir_path = tmp_dir.path().to_owned();
+        let tmp_dir_path_buf = tmp_dir_path.to_owned();
 
         ctrlc::set_handler(move || {
             if cleanup {
                 println!("Interrupt signal received, attempting to clean up");
-                let _ = remove_dir_all(&tmp_dir_path);
+                let _ = remove_dir_all(&tmp_dir_path_buf);
 
                 println!("Cleanup done, exiting");
             }
@@ -141,14 +143,20 @@ fn main() {
         .expect("Failed to set Ctrl+C handler");
     }
 
-    let tmp_dir_path = tmp_dir.path();
-
     let working_directory_path;
     if let Some(working_directory) = cli.working_directory {
         working_directory_path = working_directory;
     } else {
         working_directory_path = tmp_dir_path.to_path_buf();
     }
+
+    let available_space = fs2::available_space(&working_directory_path)
+        .expect("Failed to check available space on the disk of the working directory");
+
+    println!(
+        "Available disk space within the working directory: {} KiB",
+        format_binary_size(available_space)
+    );
 
     let shards_directory = [&working_directory_path, Path::new("shards")]
         .iter()
@@ -218,6 +226,22 @@ fn main() {
                 HepMC2Reader::try_from(buf_reader).expect("Failed to open HepMC2 file for reading")
             })
             .collect::<Vec<_>>();
+
+        // We need to store both the input Delphes file shards
+        // (which will be processed by each subprocess in parallel)
+        // as well as the ROOT output shards.
+        let expected_disk_space_usage = total_file_size * 2;
+
+        // Add a 5% margin for safety.
+        let required_disk_space = expected_disk_space_usage + expected_disk_space_usage / 5;
+
+        if available_space < required_disk_space {
+            panic!(
+                "Not enough available disk space on working directory's drive.\nRequired (expected): {}\nAvailable (as reported by OS): {}",
+                format_binary_size(required_disk_space),
+                format_binary_size(available_space)
+            )
+        }
 
         println!(
             "Expected average shard size: {} (x {} shards)",

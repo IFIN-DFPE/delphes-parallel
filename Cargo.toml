@@ -8,6 +8,7 @@ default-run = "DelphesHepMC2"
 bytesize = "2.3.1"
 clap = { version = "4.6.0", features = ["derive"] }
 ctrlc = { version = "3.5.2", features = ["termination"] }
+fs2 = "0.4.3"
 hepmc2 = "0.7.0"
 num_cpus = "1.17.0"
 tempdir = "0.3.7"
