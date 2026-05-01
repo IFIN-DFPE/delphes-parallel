@@ -154,7 +154,7 @@ fn main() {
         .expect("Failed to check available space on the disk of the working directory");
 
     println!(
-        "Available disk space within the working directory: {} KiB",
+        "Available disk space within the working directory: {}",
         format_binary_size(available_space)
     );
 
