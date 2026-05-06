@@ -4,6 +4,7 @@ use std::io::{BufReader, stdin};
 use std::mem::forget;
 use std::path::{Path, PathBuf, absolute};
 use std::process::exit;
+use std::time::Instant;
 use std::vec::Vec;
 
 use hepmc2::Reader as HepMC2Reader;
@@ -67,6 +68,8 @@ fn main() {
     let cli: Cli = Cli::parse();
 
     println!("Starting `DelphesHepMC2` parallelization wrapper...");
+
+    let start_time = Instant::now();
 
     let config_file_path =
         canonicalize(cli.config_file).expect("Failed to resolve path to config file");
@@ -279,6 +282,10 @@ fn main() {
     }
 
     println!("Done");
+
+    let elapsed_time = start_time.elapsed().as_secs_f64();
+
+    println!("Took a total of {:.2} seconds", elapsed_time);
 }
 
 #[cfg(test)]
